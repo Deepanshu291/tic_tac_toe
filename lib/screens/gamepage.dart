@@ -1,8 +1,10 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tic_tac_toe/Components/Showsnackbar.dart';
+import 'package:tic_tac_toe/screens/EndScreen.dart';
+import 'package:tic_tac_toe/utils/ui/theme.dart';
+
+import '../utils/common.dart';
 
 class GamePage extends StatefulWidget {
   const GamePage({super.key});
@@ -26,10 +28,11 @@ class _GamePageState extends State<GamePage> {
     '',
     '',
   ];
-  String winner = '';
+  String result = '';
   List<int> winnergame = [];
   int xScore = 0;
   int oScore = 0;
+  int filledbox = 0;
 
   List<List<int>> winningConditions = [
     [0, 1, 2],
@@ -42,9 +45,9 @@ class _GamePageState extends State<GamePage> {
     [2, 4, 6]
   ];
 
-  TextStyle customfont = GoogleFonts.coiny(
-      textStyle:
-          TextStyle(letterSpacing: 3, fontSize: 30, color: Colors.white));
+  // TextStyle customfont = GoogleFonts.coiny(
+  //     textStyle:
+  //         TextStyle(letterSpacing: 3, fontSize: 30, color: Colors.white));
 
   @override
   Widget build(BuildContext context) {
@@ -54,11 +57,11 @@ class _GamePageState extends State<GamePage> {
             "Tic tac toe",
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
-          backgroundColor: Colors.amber,
+          backgroundColor: MainColor.primaryColor,
           centerTitle: true,
         ),
         body: Container(
-          color: Colors.deepPurple,
+          color: MainColor.primaryColor,
           child: ConstrainedBox(
             constraints: const BoxConstraints.expand(),
             child: Padding(
@@ -66,36 +69,79 @@ class _GamePageState extends State<GamePage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 150,
+                        padding: EdgeInsets.all(10),
+                        decoration: xturn
+                            ? BoxDecoration(
+                                color: MainColor.secondaryColor,
+                                border: Border.all(
+                                    color: Colors.amberAccent, width: 2),
+                                borderRadius: BorderRadius.circular(20))
+                            : BoxDecoration(
+                                color: Colors.transparent,
+                                border:
+                                    Border.all(color: Colors.white, width: 2),
+                                borderRadius: BorderRadius.circular(20)),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Player",
+                              style: customfont.copyWith(fontSize: 15),
+                            ),
+                            Text("X", style: customfont.copyWith(fontSize: 50)),
+                            Text(
+                              xScore.toString(),
+                              style: customfont.copyWith(fontSize: 20),
+                            )
+                          ],
+                        ),
+                      ),
+                      Container(
+                        width: 150,
+                        padding: EdgeInsets.all(10),
+                        decoration: !xturn
+                            ? BoxDecoration(
+                                color: MainColor.secondaryColor,
+                                border: Border.all(
+                                    color: Colors.amberAccent, width: 2),
+                                borderRadius: BorderRadius.circular(20))
+                            : BoxDecoration(
+                                color: Colors.transparent,
+                                border:
+                                    Border.all(color: Colors.white, width: 2),
+                                borderRadius: BorderRadius.circular(20)),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Player",
+                              style: customfont.copyWith(fontSize: 15),
+                            ),
+                            Text("O", style: customfont.copyWith(fontSize: 50)),
+                            Text(
+                              oScore.toString(),
+                              style: customfont.copyWith(fontSize: 20),
+                            )
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                   Expanded(
-                      flex: 2,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          Column(
-                            children: [
-                              Text("PLayer O", style: customfont),
-                              Text(
-                                xScore.toString(),
-                                style: customfont,
-                              )
-                            ],
-                          ),
-                          const SizedBox(
-                            width: 20,
-                          ),
-                          Column(
-                            children: [
-                              Text(
-                                "PLayer O",
-                                style: customfont,
-                              ),
-                              Text(
-                                oScore.toString(),
-                                style: customfont,
-                              )
-                            ],
-                          )
-                        ],
+                      flex: 1,
+                      child: Text(
+                        gameOver
+                            ? result
+                            : xturn
+                                ? "Its X Turns"
+                                : "Its O Turns",
+                        style: customfont,
                       )),
                   Expanded(
                     flex: 6,
@@ -103,22 +149,22 @@ class _GamePageState extends State<GamePage> {
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 3,
+                        mainAxisSpacing: 10,
+                        crossAxisSpacing: 10,
                       ),
                       itemCount: 9,
                       itemBuilder: (BuildContext context, int index) {
                         return GestureDetector(
                           onTap: () {
                             _ontapped(index);
-                            _checkWinner(displayXO[index]);
+                            _checkRoundWinner(displayXO[index]);
                           },
                           child: Container(
-                            // height: 1,
-                            margin: const EdgeInsets.all(4),
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(10),
                                 color: winnergame.contains(index)
-                                    ? Colors.deepPurpleAccent
-                                    : Colors.yellow.shade600),
+                                    ? MainColor.secondaryColor
+                                    : MainColor.accentColor),
                             child: Center(
                               child: Text(
                                 displayXO[index],
@@ -127,7 +173,7 @@ class _GamePageState extends State<GamePage> {
                                         fontSize: 64,
                                         color: winnergame.contains(index)
                                             ? Colors.purpleAccent
-                                            : Colors.redAccent)),
+                                            : Colors.amberAccent)),
                               ),
                             ),
                           ),
@@ -135,12 +181,6 @@ class _GamePageState extends State<GamePage> {
                       },
                     ),
                   ),
-                  Expanded(
-                      flex: 1,
-                      child: Text(
-                        winner ,
-                        style: customfont,
-                      ))
                 ],
               ),
             ),
@@ -152,26 +192,37 @@ class _GamePageState extends State<GamePage> {
     setState(() {
       if (xturn && displayXO[index] == '') {
         displayXO[index] = 'X';
+        filledbox++;
         xturn = !xturn;
       } else if (!xturn && displayXO[index] == '') {
         displayXO[index] = 'O';
+        filledbox++;
         xturn = !xturn;
       }
     });
   }
 
-  void _checkWinner(String mark) {
+  void _checkRoundWinner(String mark) {
     for (var element in winningConditions) {
       if (displayXO[element[0]] == mark &&
           displayXO[element[1]] == mark &&
           displayXO[element[2]] == mark) {
-        String content = displayXO[element[0]] + " is winner";
-        winner = content;
-        showSnackBar(context, content);
+        result = "${displayXO[element[0]]} is winner";
+        gameOver = true;
         winnergame = element;
+        showSnackBar(context, "New Game starts in 3 seconds");
         _addscore(displayXO[element[0]]);
+        _checkWinner();
       }
     }
+    setState(() {
+      if (result == '' && filledbox == 9) {
+        result = "Its Tie  :)";
+        gameOver = true;
+        showSnackBar(context, "New Game starts in 3 seconds");
+        Future.delayed(const Duration(seconds: 3), _clearBoard);
+      }
+    });
   }
 
   void _clearBoard() {
@@ -180,9 +231,10 @@ class _GamePageState extends State<GamePage> {
         displayXO[i] = '';
       }
     });
-
+    filledbox = 0;
     winnergame = [];
-    winner = '';
+    result = '';
+    gameOver = false;
   }
 
   void _addscore(String w) {
@@ -193,7 +245,22 @@ class _GamePageState extends State<GamePage> {
         xScore++;
       }
     });
-
     Future.delayed(const Duration(seconds: 3), _clearBoard);
+  }
+
+  void _checkWinner() {
+    if (oScore == 3) {
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => EndScreen(winner: result),
+          ));
+    } else if (xScore == 3) {
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => EndScreen(winner: result),
+          ));
+    }
   }
 }
